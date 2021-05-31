@@ -171,10 +171,8 @@ public class Display extends javax.swing.JDialog {
         btnApagarDisplay.setEnabled(false);
         estadoDisplayHijo = 0;
         try { 
-              arduinoHijo.sendData("dispapagarDisplay");
-            } catch (ArduinoException ex) {
-                JOptionPane.showConfirmDialog(null, ex, "Error", JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE);
-            } catch (SerialPortException ex) {
+              arduinoHijo.sendData("dispapagarDisplay|");
+            } catch (ArduinoException | SerialPortException ex) {
                 JOptionPane.showConfirmDialog(null, ex, "Error", JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE);
             }
     }//GEN-LAST:event_btnApagarDisplayActionPerformed
@@ -185,7 +183,7 @@ public class Display extends javax.swing.JDialog {
         btnApagarDisplay.setEnabled(true);
         estadoDisplayHijo = 1;
         try {                
-                    arduinoHijo.sendData("dispencederDisplay");
+                    arduinoHijo.sendData("dispencederDisplay|");
             } catch (ArduinoException ex) {
                 JOptionPane.showConfirmDialog(null, ex, "Error", JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE);
             } catch (SerialPortException ex) {
@@ -211,7 +209,7 @@ public class Display extends javax.swing.JDialog {
         // TODO add your handling code here:
         
             try {                
-                    arduinoHijo.sendData("displimpiarDisplay");
+                    arduinoHijo.sendData("displimpiarDisplay|");
             } catch (ArduinoException ex) {
                 JOptionPane.showConfirmDialog(null, ex, "Error", JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE);
             } catch (SerialPortException ex) {
@@ -222,7 +220,7 @@ public class Display extends javax.swing.JDialog {
     private void btnMostrarDisplayActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnMostrarDisplayActionPerformed
         // TODO add your handling code here:
         try {                
-                    arduinoHijo.sendData("disp"+this.txtTextoDisplay.getText());
+                    arduinoHijo.sendData("disp"+this.txtTextoDisplay.getText()+"|");
             } catch (ArduinoException ex) {
                 JOptionPane.showConfirmDialog(null, ex, "Error", JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE);
             } catch (SerialPortException ex) {

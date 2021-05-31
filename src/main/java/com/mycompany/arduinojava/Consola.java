@@ -5,6 +5,8 @@
  */
 package com.mycompany.arduinojava;
 
+import javax.swing.text.DefaultCaret;
+
 /**
  *
  * @author Hp
@@ -44,9 +46,12 @@ public class Consola extends javax.swing.JFrame {
 
         txtAreaConsola.setEditable(false);
         txtAreaConsola.setBackground(new java.awt.Color(204, 204, 204));
-        txtAreaConsola.setColumns(20);
+        txtAreaConsola.setColumns(100);
         txtAreaConsola.setRows(5);
+        txtAreaConsola.setAutoscrolls(false);
         jScrollPane1.setViewportView(txtAreaConsola);
+        DefaultCaret caret = (DefaultCaret)txtAreaConsola.getCaret();
+        caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);

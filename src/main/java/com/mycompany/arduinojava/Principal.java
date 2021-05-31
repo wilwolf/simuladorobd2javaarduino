@@ -72,14 +72,14 @@ public class Principal extends javax.swing.JFrame {
         JSlider slider;
         DefaultValueDataset dataset;
         Principal prin;
-        
+            
         public void stateChanged(ChangeEvent changeevent){
             prin.brraFuelTankLevel.setValue(slider.getValue());
             prin.txtFueTan.setText(String.valueOf(slider.getValue()));
-            dataset.setValue(new Integer(slider.getValue()));
-            
-            
+            dataset.setValue(slider.getValue());
+            prin.sendPidArduino("0x2F", slider.getValue());
         } 
+        
         
         public GasolinaDial(Principal p){
             super(new BorderLayout());
@@ -107,13 +107,15 @@ public class Principal extends javax.swing.JFrame {
             pin.setRadius(0.81999999999999995D);
             dialplot.addLayer(pin);
             JFreeChart jfreechart = new JFreeChart(dialplot);
-            jfreechart.setTitle("Fuel Tank Level");
+            jfreechart.setTitle("Fuel Tank Level %");
             ChartPanel chartpanel = new ChartPanel(jfreechart);
             chartpanel.setPreferredSize(new Dimension(273, 200));
             slider = new JSlider(0, 100);
             slider.setMajorTickSpacing(10);
             slider.setPaintLabels(true);
             slider.addChangeListener(this);
+            //slider.setValue(0);
+            slider.setEnabled(false);
             add(chartpanel);
             add(slider, "South");
         }
@@ -153,9 +155,10 @@ public class Principal extends javax.swing.JFrame {
 
 		public void stateChanged(ChangeEvent changeevent)
 		{
-			dataset.setValue(new Integer(slider.getValue()));
+			dataset.setValue((slider.getValue()));
                         prin.brraEngineSpeed.setValue(slider.getValue());
                         prin.txtEngSpeed.setText(String.valueOf(slider.getValue()));
+                        prin.sendPidArduino("0X0C", slider.getValue());
                         
 		}
 
@@ -188,9 +191,11 @@ public class Principal extends javax.swing.JFrame {
 			ChartPanel chartpanel = new ChartPanel(jfreechart);
 			chartpanel.setPreferredSize(new Dimension(600, 400));
 			slider = new JSlider(0, 16383);
-			slider.setMajorTickSpacing(1000);
-			slider.setPaintLabels(false);
+			slider.setMajorTickSpacing(3000);
+			slider.setPaintLabels(true);
 			slider.addChangeListener(this);
+                        slider.setEnabled(false);
+                        //slider.setValue(0);
 			add(chartpanel);
 			add(slider, "South");
 		}
@@ -206,13 +211,16 @@ public class Principal extends javax.swing.JFrame {
                 JSlider slider1;
                 JSlider slider2;
                 Principal prin;
+                
                 public void stateChanged(ChangeEvent changeevent)
-                {
-                        dataset1.setValue(new Integer(slider1.getValue()));
-                        dataset2.setValue(new Integer(slider2.getValue()));
+                {       
+                        dataset1.setValue((slider1.getValue()));
+                        dataset2.setValue((slider2.getValue()));
                         prin.brraVehiculeSpeed.setValue(slider1.getValue());
+                        prin.sendPidArduino("0x0D", slider1.getValue());
                         prin.txtVehSpe.setText(String.valueOf(slider1.getValue()));
                         prin.brraCoolantTemperature.setValue(slider2.getValue());
+                        prin.sendPidArduino("0x05", slider2.getValue());
                         prin.txtCooTem.setText(String.valueOf(slider2.getValue()));
                 }
 
@@ -298,20 +306,23 @@ public class Principal extends javax.swing.JFrame {
                         ChartPanel chartpanel = new ChartPanel(jfreechart);
                         chartpanel.setPreferredSize(new Dimension(400, 400));
                         JPanel jpanel = new JPanel(new GridLayout(2, 2));
-                        jpanel.add(new JLabel("Velocidad:"));
-                        jpanel.add(new JLabel("Temperature:"));
+                        jpanel.add(new JLabel("Velocidad Km/h:"));
+                        jpanel.add(new JLabel("Temperature °C:"));
                         slider1 = new JSlider(0, 255);
-                        slider1.setMajorTickSpacing(20);
+                        slider1.setMajorTickSpacing(100);
                         slider1.setPaintTicks(true);
-                        slider1.setPaintLabels(false);
+                        slider1.setPaintLabels(true);
                         slider1.addChangeListener(this);
-                        jpanel.add(slider1);
+                        slider1.setEnabled(false);
+                        //slider1.setValue(0);
                         jpanel.add(slider1);
                         slider2 = new JSlider(-40, 100);
                         slider2.setMajorTickSpacing(20);
                         slider2.setPaintTicks(true);
                         slider2.setPaintLabels(true);
                         slider2.addChangeListener(this);
+                        slider2.setEnabled(false);
+                        //slider2.setValue(0);
                         jpanel.add(slider2);
                         add(chartpanel);
                         add(jpanel, "South");
@@ -1295,10 +1306,15 @@ public class Principal extends javax.swing.JFrame {
     
     private void mnuSalirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuSalirActionPerformed
         int respuesta = JOptionPane.showConfirmDialog(null, "Realmente desea salir de Ejmeplo de Conexion Arduino?", "Confirmar salida", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
-				System.out.println(respuesta);
+				
 				if(respuesta==0) {
+                                    if(btnDesconectar.isEnabled()){
+                                        JOptionPane.showConfirmDialog(null, "Cierre la conexion con el dispositivo\n Luego vuelva a internar salir", "Error", JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE);
+                                    }else{
+                                        consola.dispose();
 					setVisible(false);
-					dispose(); 
+					this.dispose();
+                                    }
 				}
     }//GEN-LAST:event_mnuSalirActionPerformed
 
@@ -1311,13 +1327,13 @@ public class Principal extends javax.swing.JFrame {
     private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
         // TODO add your handling code here:
         int respuesta = JOptionPane.showConfirmDialog(null, "Realmente desea salir de Ejmeplo de Conexion Arduino?", "Confirmar salida", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
-				System.out.println(respuesta);
-				if(respuesta==0) {
+				if(btnDesconectar.isEnabled()){
+                                        JOptionPane.showConfirmDialog(null, "Cierre la conexion con el dispositivo\n Luego vuelva a internar salir", "Error", JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE);
+                                    }else{
+                                        consola.dispose();
 					setVisible(false);
-					dispose(); 
-				}else{
-                                    
-                                }
+					this.dispose();
+                                    }
     }//GEN-LAST:event_formWindowClosing
 
     private void cbmPuertoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbmPuertoActionPerformed
@@ -1372,6 +1388,13 @@ public class Principal extends javax.swing.JFrame {
                 this.brraMAP.setEnabled(true);
                 this.brraThrottlePosition.setEnabled(true);
                 this.brraVehiculeSpeed.setEnabled(true);
+                
+                this.gasosilaDial.slider.setEnabled(true);
+                this.rpmDial.slider.setEnabled(true);
+                this.velocidadTemperaturaDial.slider1.setEnabled(true);
+                this.velocidadTemperaturaDial.slider2.setEnabled(true);
+                
+                this.setAllValues();
                    
             }catch(ArduinoException ex){
                 JOptionPane.showConfirmDialog(null, ex, "Error", JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE);
@@ -1384,6 +1407,13 @@ public class Principal extends javax.swing.JFrame {
     private void btnDesconectarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDesconectarActionPerformed
         try {
             // TODO add your handling code here:
+            try { 
+              Arduino.sendData("dispGood Bye...");
+              consola.setTxtArea("Coneccion FInalizada...");
+            } catch (ArduinoException | SerialPortException ex) {
+                JOptionPane.showConfirmDialog(null, ex, "Error", JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE);
+            }
+            this.setAllValues();
             Arduino.killArduinoConnection();
             bntConectar.setEnabled(true);
             btnDesconectar.setEnabled(false);
@@ -1404,6 +1434,13 @@ public class Principal extends javax.swing.JFrame {
                 this.brraMAP.setEnabled(false);
                 this.brraThrottlePosition.setEnabled(false);
                 this.brraVehiculeSpeed.setEnabled(false);
+                
+                this.gasosilaDial.slider.setEnabled(false);
+                this.rpmDial.slider.setEnabled(false);
+                this.velocidadTemperaturaDial.slider1.setEnabled(false);
+                this.velocidadTemperaturaDial.slider2.setEnabled(false);
+                
+                
         } catch (ArduinoException ex) {
             JOptionPane.showConfirmDialog(null, ex, "Error", JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE);
         }
@@ -1425,126 +1462,66 @@ public class Principal extends javax.swing.JFrame {
     private void brraDistanceTraveledMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_brraDistanceTraveledMouseReleased
         // TODO add your handling code here:
         this.txtDistTrav.setText(String.valueOf(this.brraDistanceTraveled.getValue()));
-         try { 
-              Arduino.sendData("0x31"+String.valueOf(this.brraDistanceTraveled.getValue()));
-            } catch (ArduinoException ex) {
-                JOptionPane.showConfirmDialog(null, ex, "Error", JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE);
-            } catch (SerialPortException ex) {
-                JOptionPane.showConfirmDialog(null, ex, "Error", JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE);
-            }
+        this.sendPidArduino("0x31",this.brraDistanceTraveled.getValue());
     }//GEN-LAST:event_brraDistanceTraveledMouseReleased
 
     private void brraVehiculeSpeedMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_brraVehiculeSpeedMouseReleased
         // TODO add your handling code here:
         this.txtVehSpe.setText(String.valueOf(this.brraVehiculeSpeed.getValue()));
         velocidadTemperaturaDial.slider1.setValue(this.brraVehiculeSpeed.getValue());
-        try { 
-              Arduino.sendData("0x0D"+String.valueOf(this.brraVehiculeSpeed.getValue()));
-            } catch (ArduinoException ex) {
-                JOptionPane.showConfirmDialog(null, ex, "Error", JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE);
-            } catch (SerialPortException ex) {
-                JOptionPane.showConfirmDialog(null, ex, "Error", JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE);
-            }
+        this.sendPidArduino("0x0D", this.brraVehiculeSpeed.getValue());
     }//GEN-LAST:event_brraVehiculeSpeedMouseReleased
 
     private void brraCoolantTemperatureMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_brraCoolantTemperatureMouseReleased
         // TODO add your handling code here:
         this.txtCooTem.setText(String.valueOf(this.brraCoolantTemperature.getValue()));
         velocidadTemperaturaDial.slider2.setValue(this.brraCoolantTemperature.getValue());
-        try { 
-              Arduino.sendData("0x05"+String.valueOf(this.brraCoolantTemperature.getValue()));
-            } catch (ArduinoException ex) {
-                JOptionPane.showConfirmDialog(null, ex, "Error", JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE);
-            } catch (SerialPortException ex) {
-                JOptionPane.showConfirmDialog(null, ex, "Error", JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE);
-            }
+        this.sendPidArduino("0x05", this.brraCoolantTemperature.getValue());
     }//GEN-LAST:event_brraCoolantTemperatureMouseReleased
 
     private void brraEngineRunTimeMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_brraEngineRunTimeMouseReleased
         // TODO add your handling code here:
         this.txtEngRun.setText(String.valueOf(this.brraEngineRunTime.getValue()));
-        try { 
-              Arduino.sendData("0x1F"+String.valueOf(this.brraEngineRunTime.getValue()));
-            } catch (ArduinoException ex) {
-                JOptionPane.showConfirmDialog(null, ex, "Error", JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE);
-            } catch (SerialPortException ex) {
-                JOptionPane.showConfirmDialog(null, ex, "Error", JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE);
-            }
+        this.sendPidArduino("0x1F", this.brraEngineRunTime.getValue());
     }//GEN-LAST:event_brraEngineRunTimeMouseReleased
 
     private void brraThrottlePositionMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_brraThrottlePositionMouseReleased
         // TODO add your handling code here:
         this.txtThrPos.setText(String.valueOf(this.brraThrottlePosition.getValue()));
-        try { 
-              Arduino.sendData("0x11"+String.valueOf(this.brraThrottlePosition.getValue()));
-            } catch (ArduinoException ex) {
-                JOptionPane.showConfirmDialog(null, ex, "Error", JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE);
-            } catch (SerialPortException ex) {
-                JOptionPane.showConfirmDialog(null, ex, "Error", JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE);
-            }
+        this.sendPidArduino("0x11", this.brraThrottlePosition.getValue());
+        
     }//GEN-LAST:event_brraThrottlePositionMouseReleased
 
     private void brraIATMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_brraIATMouseReleased
         // TODO add your handling code here:
         this.txtIAT.setText(String.valueOf(this.brraIAT.getValue()));
-        try { 
-              Arduino.sendData("0x0F"+String.valueOf(this.brraIAT.getValue()));
-            } catch (ArduinoException ex) {
-                JOptionPane.showConfirmDialog(null, ex, "Error", JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE);
-            } catch (SerialPortException ex) {
-                JOptionPane.showConfirmDialog(null, ex, "Error", JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE);
-            }
+        this.sendPidArduino("0x0F", this.brraIAT.getValue());
     }//GEN-LAST:event_brraIATMouseReleased
 
     private void brraMAFMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_brraMAFMouseReleased
         // TODO add your handling code here:
         this.txtMAF.setText(String.valueOf(this.brraMAF.getValue()));
-        try { 
-              Arduino.sendData("0x10"+String.valueOf(this.brraMAF.getValue()));
-            } catch (ArduinoException ex) {
-                JOptionPane.showConfirmDialog(null, ex, "Error", JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE);
-            } catch (SerialPortException ex) {
-                JOptionPane.showConfirmDialog(null, ex, "Error", JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE);
-            }
+        this.sendPidArduino("0x10", this.brraMAF.getValue());
     }//GEN-LAST:event_brraMAFMouseReleased
 
     private void brraMAPMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_brraMAPMouseReleased
         // TODO add your handling code here:
         this.txtMAP.setText(String.valueOf(this.brraMAP.getValue()));
-        try { 
-              Arduino.sendData("0x0B"+String.valueOf(this.brraMAP.getValue()));
-            } catch (ArduinoException ex) {
-                JOptionPane.showConfirmDialog(null, ex, "Error", JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE);
-            } catch (SerialPortException ex) {
-                JOptionPane.showConfirmDialog(null, ex, "Error", JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE);
-            }
+        this.sendPidArduino("0x0B", this.brraMAP.getValue());
     }//GEN-LAST:event_brraMAPMouseReleased
 
     private void brraFuelTankLevelMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_brraFuelTankLevelMouseReleased
         // TODO add your handling code here:
         this.txtFueTan.setText(String.valueOf(this.brraFuelTankLevel.getValue()));
         gasosilaDial.slider.setValue(this.brraFuelTankLevel.getValue());
-        try { 
-              Arduino.sendData("0x2F"+String.valueOf(this.brraFuelTankLevel.getValue()));
-              //Arduino.sendData(String.valueOf(this.brraFuelTankLevel.getValue()));
-            } catch (ArduinoException ex) {
-                JOptionPane.showConfirmDialog(null, ex, "Error", JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE);
-            } catch (SerialPortException ex) {
-                JOptionPane.showConfirmDialog(null, ex, "Error", JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE);
-            }
+        //this.sendPidArduino("0x2F",this.brraFuelTankLevel.getValue());
     }//GEN-LAST:event_brraFuelTankLevelMouseReleased
 
     private void brraEngineSpeedMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_brraEngineSpeedMouseReleased
         // TODO add your handling code here:
         this.txtEngSpeed.setText(String.valueOf(this.brraEngineSpeed.getValue()));
         rpmDial.slider.setValue(this.brraEngineSpeed.getValue());
-        try {   
-              Arduino.sendData("0x0C"+String.valueOf(this.brraEngineSpeed.getValue()));
-            } catch (ArduinoException ex) {
-                JOptionPane.showConfirmDialog(null, ex, "Error", JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE);
-            } catch (SerialPortException ex) {
-                JOptionPane.showConfirmDialog(null, ex, "Error", JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE);
-            }
+        this.sendPidArduino("0x0C",this.brraEngineSpeed.getValue());
     }//GEN-LAST:event_brraEngineSpeedMouseReleased
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
@@ -1580,6 +1557,15 @@ public class Principal extends javax.swing.JFrame {
             txtSBDisplay.setText("Display apagado");
         }
     }
+    /* Para el Envio de Pids a Arduino*/
+    public void sendPidArduino(String _pid, int _value){
+            try { 
+             Arduino.sendData(_pid+String.valueOf(_value)+"|");
+              //Arduino.sendData(String.valueOf(this.brraFuelTankLevel.getValue()));
+            } catch (ArduinoException | SerialPortException ex) {
+                JOptionPane.showConfirmDialog(null, ex, "Error", JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE);
+            }
+    }
     /**
      * @param args the command line arguments
      */
@@ -1613,6 +1599,24 @@ public class Principal extends javax.swing.JFrame {
                 new Principal().setVisible(true);
             }
         });
+    }
+    /*Para setear todos los parametros*/
+    public void setAllValues(){
+        this.brraCoolantTemperature.setValue(0);
+        this.brraDistanceTraveled.setValue(0);
+        this.brraEngineRunTime.setValue(0);
+        this.brraEngineSpeed.setValue(0);
+        this.brraFuelTankLevel.setValue(0);
+        this.brraIAT.setValue(0);
+        this.brraMAF.setValue(0);
+        this.brraMAP.setValue(0);
+        this.brraThrottlePosition.setValue(0);
+        this.brraVehiculeSpeed.setValue(0);
+        
+        this.gasosilaDial.slider.setValue(0);
+        this.rpmDial.slider.setValue(0);
+        this.velocidadTemperaturaDial.slider1.setValue(0);
+        this.velocidadTemperaturaDial.slider2.setValue(0);
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
